@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package truearchitect.v1;
 
-option go_package = "github.com/metaphori-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1";
+option go_package = "github.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1";
 
 // DevExecutor is the bidirectional streaming service between DEV CLI and TA-BFF.
 // DEV CLI connects, registers its tools, then enters a streaming loop:

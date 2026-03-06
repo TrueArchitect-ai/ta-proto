@@ -1,4 +1,4 @@
-module github.com/metaphori-ai/ta-proto
+module github.com/TrueArchitect-ai/ta-proto
 
 go 1.24.0
 

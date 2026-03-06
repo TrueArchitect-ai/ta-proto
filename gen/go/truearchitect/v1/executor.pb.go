@@ -808,7 +808,7 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\x12CONTROL_TYPE_PAUSE\x10\x03\x12\x17\n" +
 	"\x13CONTROL_TYPE_RESUME\x10\x042^\n" +
 	"\vDevExecutor\x12O\n" +
-	"\aConnect\x12\x1f.truearchitect.v1.ClientMessage\x1a\x1f.truearchitect.v1.ServerMessage(\x010\x01BJZHgithub.com/metaphori-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1b\x06proto3"
+	"\aConnect\x12\x1f.truearchitect.v1.ClientMessage\x1a\x1f.truearchitect.v1.ServerMessage(\x010\x01BNZLgithub.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1b\x06proto3"
 
 var (
 	file_truearchitect_v1_executor_proto_rawDescOnce sync.Once

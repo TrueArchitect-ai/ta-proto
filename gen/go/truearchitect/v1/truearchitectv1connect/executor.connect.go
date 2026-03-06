@@ -8,7 +8,7 @@ import (
 	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	v1 "github.com/metaphori-ai/ta-proto/gen/go/truearchitect/v1"
+	v1 "github.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1"
 	http "net/http"
 	strings "strings"
 )
