@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package truearchitect.v1;
+
+option go_package = "github.com/metaphori-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1";
+
+// DevExecutor is the bidirectional streaming service between DEV CLI and TA-BFF.
+// DEV CLI connects, registers its tools, then enters a streaming loop:
+//   - BFF sends ToolCall messages (from MAPI/LLM decisions)
+//   - DEV sends ToolResult messages (from local execution)
+service DevExecutor {
+  // Connect establishes a bidirectional stream between DEV CLI and BFF.
+  // Client sends: Registration (first message), then ToolResult messages
+  // Server sends: ToolCall messages, control messages (ping, disconnect)
+  rpc Connect(stream ClientMessage) returns (stream ServerMessage);
+}
+
+// === Client → Server (DEV → BFF) ===
+
+message ClientMessage {
+  oneof message {
+    Registration registration = 1;
+    ToolResult tool_result = 2;
+    Heartbeat heartbeat = 3;
+  }
+}
+
+// First message sent by DEV CLI after connecting.
+message Registration {
+  string client_id = 1;
+  string version = 2;
+  string work_dir = 3;           // absolute path to the working directory
+  repeated ToolSchema tools = 4; // available tools on this client
+}
+
+message ToolSchema {
+  string name = 1;
+  string description = 2;
+  string parameter_schema = 3;   // JSON Schema as string
+}
+
+message ToolResult {
+  string call_id = 1;
+  Status status = 2;
+  string content = 3;            // text for LLM context
+  string details_json = 4;       // JSON-encoded metadata for UI
+  bool is_error = 5;
+}
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_STREAMING = 1;          // partial result, more coming
+  STATUS_COMPLETE = 2;           // final result
+  STATUS_ERROR = 3;              // execution failed
+  STATUS_ABORTED = 4;            // cancelled by client
+}
+
+message Heartbeat {
+  int64 timestamp = 1;
+}
+
+// === Server → Client (BFF → DEV) ===
+
+message ServerMessage {
+  oneof message {
+    RegistrationAck registration_ack = 1;
+    ToolCall tool_call = 2;
+    Control control = 3;
+  }
+}
+
+message RegistrationAck {
+  string session_id = 1;
+  bool accepted = 2;
+  string error_message = 3;      // if not accepted
+}
+
+message ToolCall {
+  string call_id = 1;
+  string tool = 2;               // tool name (matches ToolSchema.name)
+  string arguments_json = 3;     // JSON-encoded parameters
+}
+
+message Control {
+  ControlType type = 1;
+  string reason = 2;
+}
+
+enum ControlType {
+  CONTROL_TYPE_UNSPECIFIED = 0;
+  CONTROL_TYPE_PING = 1;         // keepalive
+  CONTROL_TYPE_DISCONNECT = 2;   // server asks client to disconnect
+  CONTROL_TYPE_PAUSE = 3;        // pause tool execution
+  CONTROL_TYPE_RESUME = 4;       // resume tool execution
+}
