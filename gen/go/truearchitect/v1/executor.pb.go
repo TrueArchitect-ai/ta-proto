@@ -594,9 +594,11 @@ func (*ServerMessage_Control) isServerMessage_Message() {}
 
 type RegistrationAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"` // persisted UUID from BFF DB (not ephemeral)
 	Accepted      bool                   `protobuf:"varint,2,opt,name=accepted,proto3" json:"accepted,omitempty"`
 	ErrorMessage  string                 `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"` // if not accepted
+	ProjectId     string                 `protobuf:"bytes,4,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`          // project UUID
+	ProjectName   string                 `protobuf:"bytes,5,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`    // project display name
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -648,6 +650,20 @@ func (x *RegistrationAck) GetAccepted() bool {
 func (x *RegistrationAck) GetErrorMessage() string {
 	if x != nil {
 		return x.ErrorMessage
+	}
+	return ""
+}
+
+func (x *RegistrationAck) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *RegistrationAck) GetProjectName() string {
+	if x != nil {
+		return x.ProjectName
 	}
 	return ""
 }
@@ -843,7 +859,7 @@ func (x *CreateProjectRequest) GetHasGit() bool {
 type CreateProjectResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	SessionToken  string                 `protobuf:"bytes,2,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"` // ready for Connect stream X-API-Key
+	ProjectToken  string                 `protobuf:"bytes,2,opt,name=project_token,json=projectToken,proto3" json:"project_token,omitempty"` // long-lived token, ready for Connect stream X-API-Key (renamed from session_token)
 	ProjectName   string                 `protobuf:"bytes,3,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -886,9 +902,9 @@ func (x *CreateProjectResponse) GetProjectId() string {
 	return ""
 }
 
-func (x *CreateProjectResponse) GetSessionToken() string {
+func (x *CreateProjectResponse) GetProjectToken() string {
 	if x != nil {
-		return x.SessionToken
+		return x.ProjectToken
 	}
 	return ""
 }
@@ -898,6 +914,218 @@ func (x *CreateProjectResponse) GetProjectName() string {
 		return x.ProjectName
 	}
 	return ""
+}
+
+type SessionAggregate struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	SessionId             string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	MachineSlug           string                 `protobuf:"bytes,2,opt,name=machine_slug,json=machineSlug,proto3" json:"machine_slug,omitempty"`
+	ToolCallsCount        int64                  `protobuf:"varint,3,opt,name=tool_calls_count,json=toolCallsCount,proto3" json:"tool_calls_count,omitempty"`
+	CharactersTransferred int64                  `protobuf:"varint,4,opt,name=characters_transferred,json=charactersTransferred,proto3" json:"characters_transferred,omitempty"`
+	WordsTransferred      int64                  `protobuf:"varint,5,opt,name=words_transferred,json=wordsTransferred,proto3" json:"words_transferred,omitempty"`
+	ApproximateTokens     int64                  `protobuf:"varint,6,opt,name=approximate_tokens,json=approximateTokens,proto3" json:"approximate_tokens,omitempty"` // chars/4 approximation
+	ConnectStartUnix      int64                  `protobuf:"varint,7,opt,name=connect_start_unix,json=connectStartUnix,proto3" json:"connect_start_unix,omitempty"`  // unix timestamp
+	ConnectEndUnix        int64                  `protobuf:"varint,8,opt,name=connect_end_unix,json=connectEndUnix,proto3" json:"connect_end_unix,omitempty"`        // unix timestamp
+	ConnectDurationMs     int64                  `protobuf:"varint,9,opt,name=connect_duration_ms,json=connectDurationMs,proto3" json:"connect_duration_ms,omitempty"`
+	DisconnectReason      string                 `protobuf:"bytes,10,opt,name=disconnect_reason,json=disconnectReason,proto3" json:"disconnect_reason,omitempty"`
+	ConnectString         string                 `protobuf:"bytes,11,opt,name=connect_string,json=connectString,proto3" json:"connect_string,omitempty"` // the BFF URL used for this connection
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *SessionAggregate) Reset() {
+	*x = SessionAggregate{}
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionAggregate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionAggregate) ProtoMessage() {}
+
+func (x *SessionAggregate) ProtoReflect() protoreflect.Message {
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionAggregate.ProtoReflect.Descriptor instead.
+func (*SessionAggregate) Descriptor() ([]byte, []int) {
+	return file_truearchitect_v1_executor_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *SessionAggregate) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *SessionAggregate) GetMachineSlug() string {
+	if x != nil {
+		return x.MachineSlug
+	}
+	return ""
+}
+
+func (x *SessionAggregate) GetToolCallsCount() int64 {
+	if x != nil {
+		return x.ToolCallsCount
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetCharactersTransferred() int64 {
+	if x != nil {
+		return x.CharactersTransferred
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetWordsTransferred() int64 {
+	if x != nil {
+		return x.WordsTransferred
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetApproximateTokens() int64 {
+	if x != nil {
+		return x.ApproximateTokens
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetConnectStartUnix() int64 {
+	if x != nil {
+		return x.ConnectStartUnix
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetConnectEndUnix() int64 {
+	if x != nil {
+		return x.ConnectEndUnix
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetConnectDurationMs() int64 {
+	if x != nil {
+		return x.ConnectDurationMs
+	}
+	return 0
+}
+
+func (x *SessionAggregate) GetDisconnectReason() string {
+	if x != nil {
+		return x.DisconnectReason
+	}
+	return ""
+}
+
+func (x *SessionAggregate) GetConnectString() string {
+	if x != nil {
+		return x.ConnectString
+	}
+	return ""
+}
+
+type ReportSessionAggregateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Aggregate     *SessionAggregate      `protobuf:"bytes,1,opt,name=aggregate,proto3" json:"aggregate,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReportSessionAggregateRequest) Reset() {
+	*x = ReportSessionAggregateRequest{}
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportSessionAggregateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportSessionAggregateRequest) ProtoMessage() {}
+
+func (x *ReportSessionAggregateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportSessionAggregateRequest.ProtoReflect.Descriptor instead.
+func (*ReportSessionAggregateRequest) Descriptor() ([]byte, []int) {
+	return file_truearchitect_v1_executor_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ReportSessionAggregateRequest) GetAggregate() *SessionAggregate {
+	if x != nil {
+		return x.Aggregate
+	}
+	return nil
+}
+
+type ReportSessionAggregateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Accepted      bool                   `protobuf:"varint,1,opt,name=accepted,proto3" json:"accepted,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReportSessionAggregateResponse) Reset() {
+	*x = ReportSessionAggregateResponse{}
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReportSessionAggregateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportSessionAggregateResponse) ProtoMessage() {}
+
+func (x *ReportSessionAggregateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportSessionAggregateResponse.ProtoReflect.Descriptor instead.
+func (*ReportSessionAggregateResponse) Descriptor() ([]byte, []int) {
+	return file_truearchitect_v1_executor_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ReportSessionAggregateResponse) GetAccepted() bool {
+	if x != nil {
+		return x.Accepted
+	}
+	return false
 }
 
 var File_truearchitect_v1_executor_proto protoreflect.FileDescriptor
@@ -937,12 +1165,15 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\x10registration_ack\x18\x01 \x01(\v2!.truearchitect.v1.RegistrationAckH\x00R\x0fregistrationAck\x129\n" +
 	"\ttool_call\x18\x02 \x01(\v2\x1a.truearchitect.v1.ToolCallH\x00R\btoolCall\x125\n" +
 	"\acontrol\x18\x03 \x01(\v2\x19.truearchitect.v1.ControlH\x00R\acontrolB\t\n" +
-	"\amessage\"q\n" +
+	"\amessage\"\xb3\x01\n" +
 	"\x0fRegistrationAck\x12\x1d\n" +
 	"\n" +
 	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x1a\n" +
 	"\baccepted\x18\x02 \x01(\bR\baccepted\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"^\n" +
+	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x04 \x01(\tR\tprojectId\x12!\n" +
+	"\fproject_name\x18\x05 \x01(\tR\vprojectName\"^\n" +
 	"\bToolCall\x12\x17\n" +
 	"\acall_id\x18\x01 \x01(\tR\x06callId\x12\x12\n" +
 	"\x04tool\x18\x02 \x01(\tR\x04tool\x12%\n" +
@@ -960,8 +1191,26 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\x15CreateProjectResponse\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12#\n" +
-	"\rsession_token\x18\x02 \x01(\tR\fsessionToken\x12!\n" +
-	"\fproject_name\x18\x03 \x01(\tR\vprojectName*q\n" +
+	"\rproject_token\x18\x02 \x01(\tR\fprojectToken\x12!\n" +
+	"\fproject_name\x18\x03 \x01(\tR\vprojectName\"\xed\x03\n" +
+	"\x10SessionAggregate\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12!\n" +
+	"\fmachine_slug\x18\x02 \x01(\tR\vmachineSlug\x12(\n" +
+	"\x10tool_calls_count\x18\x03 \x01(\x03R\x0etoolCallsCount\x125\n" +
+	"\x16characters_transferred\x18\x04 \x01(\x03R\x15charactersTransferred\x12+\n" +
+	"\x11words_transferred\x18\x05 \x01(\x03R\x10wordsTransferred\x12-\n" +
+	"\x12approximate_tokens\x18\x06 \x01(\x03R\x11approximateTokens\x12,\n" +
+	"\x12connect_start_unix\x18\a \x01(\x03R\x10connectStartUnix\x12(\n" +
+	"\x10connect_end_unix\x18\b \x01(\x03R\x0econnectEndUnix\x12.\n" +
+	"\x13connect_duration_ms\x18\t \x01(\x03R\x11connectDurationMs\x12+\n" +
+	"\x11disconnect_reason\x18\n" +
+	" \x01(\tR\x10disconnectReason\x12%\n" +
+	"\x0econnect_string\x18\v \x01(\tR\rconnectString\"a\n" +
+	"\x1dReportSessionAggregateRequest\x12@\n" +
+	"\taggregate\x18\x01 \x01(\v2\".truearchitect.v1.SessionAggregateR\taggregate\"<\n" +
+	"\x1eReportSessionAggregateResponse\x12\x1a\n" +
+	"\baccepted\x18\x01 \x01(\bR\baccepted*q\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10STATUS_STREAMING\x10\x01\x12\x13\n" +
@@ -973,10 +1222,11 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\x11CONTROL_TYPE_PING\x10\x01\x12\x1b\n" +
 	"\x17CONTROL_TYPE_DISCONNECT\x10\x02\x12\x16\n" +
 	"\x12CONTROL_TYPE_PAUSE\x10\x03\x12\x17\n" +
-	"\x13CONTROL_TYPE_RESUME\x10\x042\xc0\x01\n" +
+	"\x13CONTROL_TYPE_RESUME\x10\x042\xbd\x02\n" +
 	"\vDevExecutor\x12O\n" +
 	"\aConnect\x12\x1f.truearchitect.v1.ClientMessage\x1a\x1f.truearchitect.v1.ServerMessage(\x010\x01\x12`\n" +
-	"\rCreateProject\x12&.truearchitect.v1.CreateProjectRequest\x1a'.truearchitect.v1.CreateProjectResponseBNZLgithub.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1b\x06proto3"
+	"\rCreateProject\x12&.truearchitect.v1.CreateProjectRequest\x1a'.truearchitect.v1.CreateProjectResponse\x12{\n" +
+	"\x16ReportSessionAggregate\x12/.truearchitect.v1.ReportSessionAggregateRequest\x1a0.truearchitect.v1.ReportSessionAggregateResponseBNZLgithub.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1b\x06proto3"
 
 var (
 	file_truearchitect_v1_executor_proto_rawDescOnce sync.Once
@@ -991,21 +1241,24 @@ func file_truearchitect_v1_executor_proto_rawDescGZIP() []byte {
 }
 
 var file_truearchitect_v1_executor_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_truearchitect_v1_executor_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_truearchitect_v1_executor_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_truearchitect_v1_executor_proto_goTypes = []any{
-	(Status)(0),                   // 0: truearchitect.v1.Status
-	(ControlType)(0),              // 1: truearchitect.v1.ControlType
-	(*ClientMessage)(nil),         // 2: truearchitect.v1.ClientMessage
-	(*Registration)(nil),          // 3: truearchitect.v1.Registration
-	(*ToolSchema)(nil),            // 4: truearchitect.v1.ToolSchema
-	(*ToolResult)(nil),            // 5: truearchitect.v1.ToolResult
-	(*Heartbeat)(nil),             // 6: truearchitect.v1.Heartbeat
-	(*ServerMessage)(nil),         // 7: truearchitect.v1.ServerMessage
-	(*RegistrationAck)(nil),       // 8: truearchitect.v1.RegistrationAck
-	(*ToolCall)(nil),              // 9: truearchitect.v1.ToolCall
-	(*Control)(nil),               // 10: truearchitect.v1.Control
-	(*CreateProjectRequest)(nil),  // 11: truearchitect.v1.CreateProjectRequest
-	(*CreateProjectResponse)(nil), // 12: truearchitect.v1.CreateProjectResponse
+	(Status)(0),                            // 0: truearchitect.v1.Status
+	(ControlType)(0),                       // 1: truearchitect.v1.ControlType
+	(*ClientMessage)(nil),                  // 2: truearchitect.v1.ClientMessage
+	(*Registration)(nil),                   // 3: truearchitect.v1.Registration
+	(*ToolSchema)(nil),                     // 4: truearchitect.v1.ToolSchema
+	(*ToolResult)(nil),                     // 5: truearchitect.v1.ToolResult
+	(*Heartbeat)(nil),                      // 6: truearchitect.v1.Heartbeat
+	(*ServerMessage)(nil),                  // 7: truearchitect.v1.ServerMessage
+	(*RegistrationAck)(nil),                // 8: truearchitect.v1.RegistrationAck
+	(*ToolCall)(nil),                       // 9: truearchitect.v1.ToolCall
+	(*Control)(nil),                        // 10: truearchitect.v1.Control
+	(*CreateProjectRequest)(nil),           // 11: truearchitect.v1.CreateProjectRequest
+	(*CreateProjectResponse)(nil),          // 12: truearchitect.v1.CreateProjectResponse
+	(*SessionAggregate)(nil),               // 13: truearchitect.v1.SessionAggregate
+	(*ReportSessionAggregateRequest)(nil),  // 14: truearchitect.v1.ReportSessionAggregateRequest
+	(*ReportSessionAggregateResponse)(nil), // 15: truearchitect.v1.ReportSessionAggregateResponse
 }
 var file_truearchitect_v1_executor_proto_depIdxs = []int32{
 	3,  // 0: truearchitect.v1.ClientMessage.registration:type_name -> truearchitect.v1.Registration
@@ -1017,15 +1270,18 @@ var file_truearchitect_v1_executor_proto_depIdxs = []int32{
 	9,  // 6: truearchitect.v1.ServerMessage.tool_call:type_name -> truearchitect.v1.ToolCall
 	10, // 7: truearchitect.v1.ServerMessage.control:type_name -> truearchitect.v1.Control
 	1,  // 8: truearchitect.v1.Control.type:type_name -> truearchitect.v1.ControlType
-	2,  // 9: truearchitect.v1.DevExecutor.Connect:input_type -> truearchitect.v1.ClientMessage
-	11, // 10: truearchitect.v1.DevExecutor.CreateProject:input_type -> truearchitect.v1.CreateProjectRequest
-	7,  // 11: truearchitect.v1.DevExecutor.Connect:output_type -> truearchitect.v1.ServerMessage
-	12, // 12: truearchitect.v1.DevExecutor.CreateProject:output_type -> truearchitect.v1.CreateProjectResponse
-	11, // [11:13] is the sub-list for method output_type
-	9,  // [9:11] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	13, // 9: truearchitect.v1.ReportSessionAggregateRequest.aggregate:type_name -> truearchitect.v1.SessionAggregate
+	2,  // 10: truearchitect.v1.DevExecutor.Connect:input_type -> truearchitect.v1.ClientMessage
+	11, // 11: truearchitect.v1.DevExecutor.CreateProject:input_type -> truearchitect.v1.CreateProjectRequest
+	14, // 12: truearchitect.v1.DevExecutor.ReportSessionAggregate:input_type -> truearchitect.v1.ReportSessionAggregateRequest
+	7,  // 13: truearchitect.v1.DevExecutor.Connect:output_type -> truearchitect.v1.ServerMessage
+	12, // 14: truearchitect.v1.DevExecutor.CreateProject:output_type -> truearchitect.v1.CreateProjectResponse
+	15, // 15: truearchitect.v1.DevExecutor.ReportSessionAggregate:output_type -> truearchitect.v1.ReportSessionAggregateResponse
+	13, // [13:16] is the sub-list for method output_type
+	10, // [10:13] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_truearchitect_v1_executor_proto_init() }
@@ -1049,7 +1305,7 @@ func file_truearchitect_v1_executor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_truearchitect_v1_executor_proto_rawDesc), len(file_truearchitect_v1_executor_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   11,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

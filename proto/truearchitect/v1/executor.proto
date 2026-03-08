@@ -14,9 +14,13 @@ service DevExecutor {
   // Server sends: ToolCall messages, control messages (ping, disconnect)
   rpc Connect(stream ClientMessage) returns (stream ServerMessage);
 
-  // CreateProject creates a project and session token via API key auth.
+  // CreateProject creates a project and project token via API key auth.
   // Used by `$ dev create --api-key` flow — CLI creates project without web UI.
   rpc CreateProject(CreateProjectRequest) returns (CreateProjectResponse);
+
+  // ReportSessionAggregate posts session stats after disconnect.
+  // Separate unary RPC (not over bidi stream) so it tolerates stream drops.
+  rpc ReportSessionAggregate(ReportSessionAggregateRequest) returns (ReportSessionAggregateResponse);
 }
 
 // === Client → Server (DEV → BFF) ===
@@ -76,9 +80,11 @@ message ServerMessage {
 }
 
 message RegistrationAck {
-  string session_id = 1;
+  string session_id = 1;            // persisted UUID from BFF DB (not ephemeral)
   bool accepted = 2;
-  string error_message = 3;      // if not accepted
+  string error_message = 3;         // if not accepted
+  string project_id = 4;            // project UUID
+  string project_name = 5;          // project display name
 }
 
 message ToolCall {
@@ -112,6 +118,30 @@ message CreateProjectRequest {
 
 message CreateProjectResponse {
   string project_id = 1;
-  string session_token = 2;     // ready for Connect stream X-API-Key
+  string project_token = 2;        // long-lived token, ready for Connect stream X-API-Key (renamed from session_token)
   string project_name = 3;
+}
+
+// === Session Aggregate (post-disconnect stats) ===
+
+message SessionAggregate {
+  string session_id = 1;
+  string machine_slug = 2;
+  int64 tool_calls_count = 3;
+  int64 characters_transferred = 4;
+  int64 words_transferred = 5;
+  int64 approximate_tokens = 6;    // chars/4 approximation
+  int64 connect_start_unix = 7;    // unix timestamp
+  int64 connect_end_unix = 8;      // unix timestamp
+  int64 connect_duration_ms = 9;
+  string disconnect_reason = 10;
+  string connect_string = 11;      // the BFF URL used for this connection
+}
+
+message ReportSessionAggregateRequest {
+  SessionAggregate aggregate = 1;
+}
+
+message ReportSessionAggregateResponse {
+  bool accepted = 1;
 }
