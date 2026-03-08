@@ -35,6 +35,9 @@ const (
 const (
 	// DevExecutorConnectProcedure is the fully-qualified name of the DevExecutor's Connect RPC.
 	DevExecutorConnectProcedure = "/truearchitect.v1.DevExecutor/Connect"
+	// DevExecutorCreateProjectProcedure is the fully-qualified name of the DevExecutor's CreateProject
+	// RPC.
+	DevExecutorCreateProjectProcedure = "/truearchitect.v1.DevExecutor/CreateProject"
 )
 
 // DevExecutorClient is a client for the truearchitect.v1.DevExecutor service.
@@ -43,6 +46,9 @@ type DevExecutorClient interface {
 	// Client sends: Registration (first message), then ToolResult messages
 	// Server sends: ToolCall messages, control messages (ping, disconnect)
 	Connect(context.Context) *connect.BidiStreamForClient[v1.ClientMessage, v1.ServerMessage]
+	// CreateProject creates a project and session token via API key auth.
+	// Used by `$ dev create --api-key` flow — CLI creates project without web UI.
+	CreateProject(context.Context, *connect.Request[v1.CreateProjectRequest]) (*connect.Response[v1.CreateProjectResponse], error)
 }
 
 // NewDevExecutorClient constructs a client for the truearchitect.v1.DevExecutor service. By
@@ -62,17 +68,29 @@ func NewDevExecutorClient(httpClient connect.HTTPClient, baseURL string, opts ..
 			connect.WithSchema(devExecutorMethods.ByName("Connect")),
 			connect.WithClientOptions(opts...),
 		),
+		createProject: connect.NewClient[v1.CreateProjectRequest, v1.CreateProjectResponse](
+			httpClient,
+			baseURL+DevExecutorCreateProjectProcedure,
+			connect.WithSchema(devExecutorMethods.ByName("CreateProject")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
 // devExecutorClient implements DevExecutorClient.
 type devExecutorClient struct {
-	connect *connect.Client[v1.ClientMessage, v1.ServerMessage]
+	connect       *connect.Client[v1.ClientMessage, v1.ServerMessage]
+	createProject *connect.Client[v1.CreateProjectRequest, v1.CreateProjectResponse]
 }
 
 // Connect calls truearchitect.v1.DevExecutor.Connect.
 func (c *devExecutorClient) Connect(ctx context.Context) *connect.BidiStreamForClient[v1.ClientMessage, v1.ServerMessage] {
 	return c.connect.CallBidiStream(ctx)
+}
+
+// CreateProject calls truearchitect.v1.DevExecutor.CreateProject.
+func (c *devExecutorClient) CreateProject(ctx context.Context, req *connect.Request[v1.CreateProjectRequest]) (*connect.Response[v1.CreateProjectResponse], error) {
+	return c.createProject.CallUnary(ctx, req)
 }
 
 // DevExecutorHandler is an implementation of the truearchitect.v1.DevExecutor service.
@@ -81,6 +99,9 @@ type DevExecutorHandler interface {
 	// Client sends: Registration (first message), then ToolResult messages
 	// Server sends: ToolCall messages, control messages (ping, disconnect)
 	Connect(context.Context, *connect.BidiStream[v1.ClientMessage, v1.ServerMessage]) error
+	// CreateProject creates a project and session token via API key auth.
+	// Used by `$ dev create --api-key` flow — CLI creates project without web UI.
+	CreateProject(context.Context, *connect.Request[v1.CreateProjectRequest]) (*connect.Response[v1.CreateProjectResponse], error)
 }
 
 // NewDevExecutorHandler builds an HTTP handler from the service implementation. It returns the path
@@ -96,10 +117,18 @@ func NewDevExecutorHandler(svc DevExecutorHandler, opts ...connect.HandlerOption
 		connect.WithSchema(devExecutorMethods.ByName("Connect")),
 		connect.WithHandlerOptions(opts...),
 	)
+	devExecutorCreateProjectHandler := connect.NewUnaryHandler(
+		DevExecutorCreateProjectProcedure,
+		svc.CreateProject,
+		connect.WithSchema(devExecutorMethods.ByName("CreateProject")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/truearchitect.v1.DevExecutor/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DevExecutorConnectProcedure:
 			devExecutorConnectHandler.ServeHTTP(w, r)
+		case DevExecutorCreateProjectProcedure:
+			devExecutorCreateProjectHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -111,4 +140,8 @@ type UnimplementedDevExecutorHandler struct{}
 
 func (UnimplementedDevExecutorHandler) Connect(context.Context, *connect.BidiStream[v1.ClientMessage, v1.ServerMessage]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("truearchitect.v1.DevExecutor.Connect is not implemented"))
+}
+
+func (UnimplementedDevExecutorHandler) CreateProject(context.Context, *connect.Request[v1.CreateProjectRequest]) (*connect.Response[v1.CreateProjectResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("truearchitect.v1.DevExecutor.CreateProject is not implemented"))
 }

@@ -234,8 +234,10 @@ type Registration struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ClientId      string                 `protobuf:"bytes,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
 	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	WorkDir       string                 `protobuf:"bytes,3,opt,name=work_dir,json=workDir,proto3" json:"work_dir,omitempty"` // absolute path to the working directory
-	Tools         []*ToolSchema          `protobuf:"bytes,4,rep,name=tools,proto3" json:"tools,omitempty"`                    // available tools on this client
+	WorkDir       string                 `protobuf:"bytes,3,opt,name=work_dir,json=workDir,proto3" json:"work_dir,omitempty"`             // absolute path to the working directory
+	Tools         []*ToolSchema          `protobuf:"bytes,4,rep,name=tools,proto3" json:"tools,omitempty"`                                // available tools on this client
+	MachineId     string                 `protobuf:"bytes,5,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`       // UUID, stable per machine (from credentials.json)
+	MachineSlug   string                 `protobuf:"bytes,6,opt,name=machine_slug,json=machineSlug,proto3" json:"machine_slug,omitempty"` // user-chosen, max 10 chars (e.g. "mbp-home")
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -296,6 +298,20 @@ func (x *Registration) GetTools() []*ToolSchema {
 		return x.Tools
 	}
 	return nil
+}
+
+func (x *Registration) GetMachineId() string {
+	if x != nil {
+		return x.MachineId
+	}
+	return ""
+}
+
+func (x *Registration) GetMachineSlug() string {
+	if x != nil {
+		return x.MachineSlug
+	}
+	return ""
 }
 
 type ToolSchema struct {
@@ -748,6 +764,142 @@ func (x *Control) GetReason() string {
 	return ""
 }
 
+type CreateProjectRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`              // optional
+	Cwd           string                 `protobuf:"bytes,3,opt,name=cwd,proto3" json:"cwd,omitempty"`                              // absolute path to working directory
+	GitRemote     string                 `protobuf:"bytes,4,opt,name=git_remote,json=gitRemote,proto3" json:"git_remote,omitempty"` // optional
+	HasGit        bool                   `protobuf:"varint,5,opt,name=has_git,json=hasGit,proto3" json:"has_git,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateProjectRequest) Reset() {
+	*x = CreateProjectRequest{}
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateProjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateProjectRequest) ProtoMessage() {}
+
+func (x *CreateProjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateProjectRequest.ProtoReflect.Descriptor instead.
+func (*CreateProjectRequest) Descriptor() ([]byte, []int) {
+	return file_truearchitect_v1_executor_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *CreateProjectRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetCwd() string {
+	if x != nil {
+		return x.Cwd
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetGitRemote() string {
+	if x != nil {
+		return x.GitRemote
+	}
+	return ""
+}
+
+func (x *CreateProjectRequest) GetHasGit() bool {
+	if x != nil {
+		return x.HasGit
+	}
+	return false
+}
+
+type CreateProjectResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectId     string                 `protobuf:"bytes,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	SessionToken  string                 `protobuf:"bytes,2,opt,name=session_token,json=sessionToken,proto3" json:"session_token,omitempty"` // ready for Connect stream X-API-Key
+	ProjectName   string                 `protobuf:"bytes,3,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateProjectResponse) Reset() {
+	*x = CreateProjectResponse{}
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateProjectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateProjectResponse) ProtoMessage() {}
+
+func (x *CreateProjectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_truearchitect_v1_executor_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateProjectResponse.ProtoReflect.Descriptor instead.
+func (*CreateProjectResponse) Descriptor() ([]byte, []int) {
+	return file_truearchitect_v1_executor_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CreateProjectResponse) GetProjectId() string {
+	if x != nil {
+		return x.ProjectId
+	}
+	return ""
+}
+
+func (x *CreateProjectResponse) GetSessionToken() string {
+	if x != nil {
+		return x.SessionToken
+	}
+	return ""
+}
+
+func (x *CreateProjectResponse) GetProjectName() string {
+	if x != nil {
+		return x.ProjectName
+	}
+	return ""
+}
+
 var File_truearchitect_v1_executor_proto protoreflect.FileDescriptor
 
 const file_truearchitect_v1_executor_proto_rawDesc = "" +
@@ -758,12 +910,15 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\vtool_result\x18\x02 \x01(\v2\x1c.truearchitect.v1.ToolResultH\x00R\n" +
 	"toolResult\x12;\n" +
 	"\theartbeat\x18\x03 \x01(\v2\x1b.truearchitect.v1.HeartbeatH\x00R\theartbeatB\t\n" +
-	"\amessage\"\x94\x01\n" +
+	"\amessage\"\xd6\x01\n" +
 	"\fRegistration\x12\x1b\n" +
 	"\tclient_id\x18\x01 \x01(\tR\bclientId\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12\x19\n" +
 	"\bwork_dir\x18\x03 \x01(\tR\aworkDir\x122\n" +
-	"\x05tools\x18\x04 \x03(\v2\x1c.truearchitect.v1.ToolSchemaR\x05tools\"m\n" +
+	"\x05tools\x18\x04 \x03(\v2\x1c.truearchitect.v1.ToolSchemaR\x05tools\x12\x1d\n" +
+	"\n" +
+	"machine_id\x18\x05 \x01(\tR\tmachineId\x12!\n" +
+	"\fmachine_slug\x18\x06 \x01(\tR\vmachineSlug\"m\n" +
 	"\n" +
 	"ToolSchema\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
@@ -794,7 +949,19 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\x0earguments_json\x18\x03 \x01(\tR\rargumentsJson\"T\n" +
 	"\aControl\x121\n" +
 	"\x04type\x18\x01 \x01(\x0e2\x1d.truearchitect.v1.ControlTypeR\x04type\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason*q\n" +
+	"\x06reason\x18\x02 \x01(\tR\x06reason\"\x96\x01\n" +
+	"\x14CreateProjectRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
+	"\x03cwd\x18\x03 \x01(\tR\x03cwd\x12\x1d\n" +
+	"\n" +
+	"git_remote\x18\x04 \x01(\tR\tgitRemote\x12\x17\n" +
+	"\ahas_git\x18\x05 \x01(\bR\x06hasGit\"~\n" +
+	"\x15CreateProjectResponse\x12\x1d\n" +
+	"\n" +
+	"project_id\x18\x01 \x01(\tR\tprojectId\x12#\n" +
+	"\rsession_token\x18\x02 \x01(\tR\fsessionToken\x12!\n" +
+	"\fproject_name\x18\x03 \x01(\tR\vprojectName*q\n" +
 	"\x06Status\x12\x16\n" +
 	"\x12STATUS_UNSPECIFIED\x10\x00\x12\x14\n" +
 	"\x10STATUS_STREAMING\x10\x01\x12\x13\n" +
@@ -806,9 +973,10 @@ const file_truearchitect_v1_executor_proto_rawDesc = "" +
 	"\x11CONTROL_TYPE_PING\x10\x01\x12\x1b\n" +
 	"\x17CONTROL_TYPE_DISCONNECT\x10\x02\x12\x16\n" +
 	"\x12CONTROL_TYPE_PAUSE\x10\x03\x12\x17\n" +
-	"\x13CONTROL_TYPE_RESUME\x10\x042^\n" +
+	"\x13CONTROL_TYPE_RESUME\x10\x042\xc0\x01\n" +
 	"\vDevExecutor\x12O\n" +
-	"\aConnect\x12\x1f.truearchitect.v1.ClientMessage\x1a\x1f.truearchitect.v1.ServerMessage(\x010\x01BNZLgithub.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1b\x06proto3"
+	"\aConnect\x12\x1f.truearchitect.v1.ClientMessage\x1a\x1f.truearchitect.v1.ServerMessage(\x010\x01\x12`\n" +
+	"\rCreateProject\x12&.truearchitect.v1.CreateProjectRequest\x1a'.truearchitect.v1.CreateProjectResponseBNZLgithub.com/TrueArchitect-ai/ta-proto/gen/go/truearchitect/v1;truearchitectv1b\x06proto3"
 
 var (
 	file_truearchitect_v1_executor_proto_rawDescOnce sync.Once
@@ -823,19 +991,21 @@ func file_truearchitect_v1_executor_proto_rawDescGZIP() []byte {
 }
 
 var file_truearchitect_v1_executor_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_truearchitect_v1_executor_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_truearchitect_v1_executor_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_truearchitect_v1_executor_proto_goTypes = []any{
-	(Status)(0),             // 0: truearchitect.v1.Status
-	(ControlType)(0),        // 1: truearchitect.v1.ControlType
-	(*ClientMessage)(nil),   // 2: truearchitect.v1.ClientMessage
-	(*Registration)(nil),    // 3: truearchitect.v1.Registration
-	(*ToolSchema)(nil),      // 4: truearchitect.v1.ToolSchema
-	(*ToolResult)(nil),      // 5: truearchitect.v1.ToolResult
-	(*Heartbeat)(nil),       // 6: truearchitect.v1.Heartbeat
-	(*ServerMessage)(nil),   // 7: truearchitect.v1.ServerMessage
-	(*RegistrationAck)(nil), // 8: truearchitect.v1.RegistrationAck
-	(*ToolCall)(nil),        // 9: truearchitect.v1.ToolCall
-	(*Control)(nil),         // 10: truearchitect.v1.Control
+	(Status)(0),                   // 0: truearchitect.v1.Status
+	(ControlType)(0),              // 1: truearchitect.v1.ControlType
+	(*ClientMessage)(nil),         // 2: truearchitect.v1.ClientMessage
+	(*Registration)(nil),          // 3: truearchitect.v1.Registration
+	(*ToolSchema)(nil),            // 4: truearchitect.v1.ToolSchema
+	(*ToolResult)(nil),            // 5: truearchitect.v1.ToolResult
+	(*Heartbeat)(nil),             // 6: truearchitect.v1.Heartbeat
+	(*ServerMessage)(nil),         // 7: truearchitect.v1.ServerMessage
+	(*RegistrationAck)(nil),       // 8: truearchitect.v1.RegistrationAck
+	(*ToolCall)(nil),              // 9: truearchitect.v1.ToolCall
+	(*Control)(nil),               // 10: truearchitect.v1.Control
+	(*CreateProjectRequest)(nil),  // 11: truearchitect.v1.CreateProjectRequest
+	(*CreateProjectResponse)(nil), // 12: truearchitect.v1.CreateProjectResponse
 }
 var file_truearchitect_v1_executor_proto_depIdxs = []int32{
 	3,  // 0: truearchitect.v1.ClientMessage.registration:type_name -> truearchitect.v1.Registration
@@ -848,9 +1018,11 @@ var file_truearchitect_v1_executor_proto_depIdxs = []int32{
 	10, // 7: truearchitect.v1.ServerMessage.control:type_name -> truearchitect.v1.Control
 	1,  // 8: truearchitect.v1.Control.type:type_name -> truearchitect.v1.ControlType
 	2,  // 9: truearchitect.v1.DevExecutor.Connect:input_type -> truearchitect.v1.ClientMessage
-	7,  // 10: truearchitect.v1.DevExecutor.Connect:output_type -> truearchitect.v1.ServerMessage
-	10, // [10:11] is the sub-list for method output_type
-	9,  // [9:10] is the sub-list for method input_type
+	11, // 10: truearchitect.v1.DevExecutor.CreateProject:input_type -> truearchitect.v1.CreateProjectRequest
+	7,  // 11: truearchitect.v1.DevExecutor.Connect:output_type -> truearchitect.v1.ServerMessage
+	12, // 12: truearchitect.v1.DevExecutor.CreateProject:output_type -> truearchitect.v1.CreateProjectResponse
+	11, // [11:13] is the sub-list for method output_type
+	9,  // [9:11] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name
@@ -877,7 +1049,7 @@ func file_truearchitect_v1_executor_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_truearchitect_v1_executor_proto_rawDesc), len(file_truearchitect_v1_executor_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
